@@ -1,8 +1,8 @@
-use std::process::id;
+mod crud;
 
-use chrono::prelude::*;
-use chrono::serde::ts_seconds::serialize as to_ts;
-use reqwest;
+// use chrono::prelude::*;
+// use chrono::serde::ts_seconds::serialize as to_ts;
+// use reqwest;
 use serde::{Deserialize, Serialize};
 
 // #[derive(Serialize)]
@@ -24,134 +24,55 @@ struct CreateUser {
     field: String,
     money: u128,
 }
-
-#[derive(Deserialize)]
-struct For_vect {
-    collectionName: String,
-    field: String,
-    id: String,
+#[derive(Serialize)]
+struct Money {
     money: u128,
-    updated: String,
-    username: String,
 }
 
 #[derive(Deserialize)]
-struct User {
-    items: Vec<For_vect>,
+struct ForVect {
+    // collectionName: String,
+    // field: String,
+    id: String,
+    // money: u128,
+    // updated: String,
+    // username: String,
 }
 
-#[tokio::main]
-async fn get_user(url: String) -> User {
-    let mut some_string = String::from(&url);
-    some_string.push_str("/api/collections/user/records");
-    let client = reqwest::Client::new();
-    let resp = client
-        .get(&some_string)
-        .send()
-        .await
-        .unwrap()
-        .json::<User>()
-        .await
-        .expect("failed");
-    return resp;
-}
-
-fn construct_headers() -> reqwest::header::HeaderMap {
-    let mut headers = reqwest::header::HeaderMap::new();
-    headers.insert(
-        reqwest::header::CONTENT_TYPE,
-        reqwest::header::HeaderValue::from_static("application/json"),
-    );
-    headers
-}
-
-#[tokio::main]
-async fn create_user(user: &str, url: String) -> String {
-    let mut some_string = String::from(&url);
-    some_string.push_str("/api/collections/user/records");
-    let client = reqwest::Client::new();
-    let idk = client
-        .post(&some_string)
-        .body(String::from(user))
-        .headers(construct_headers())
-        .send()
-        .await
-        .expect("fail to post")
-        .text()
-        .await
-        .expect("failed to post");
-    return idk;
-}
-#[tokio::main]
-async fn select_user(user: &str, url: String, id: String) -> String {
-    let mut some_string = String::from(&url);
-    some_string.push_str("/api/collections/user/records/");
-    some_string.push_str(&id);
-    let client = reqwest::Client::new();
-    let idk = client
-        .get(&some_string)
-        .send()
-        .await
-        .expect("fail to post")
-        .text()
-        .await
-        .expect("failed to post");
-    return idk;
-}
-#[tokio::main]
-async fn edit_user(user: &str, url: String, id: String) -> String {
-    let mut some_string = String::from(&url);
-    some_string.push_str("/api/collections/user/records/");
-    some_string.push_str(&id);
-    let client = reqwest::Client::new();
-    let idk = client
-        .patch(&some_string)
-        .body(String::from(user))
-        .headers(construct_headers())
-        .send()
-        .await
-        .expect("fail to post")
-        .text()
-        .await
-        .expect("failed to post");
-    return idk;
-}
-#[tokio::main]
-async fn delete_user(user: &str, url: String, id: String) -> String {
-    let mut some_string = String::from(&url);
-    some_string.push_str("/api/collections/user/records/");
-    some_string.push_str(&id);
-    let client = reqwest::Client::new();
-    let idk = client
-        .delete(&some_string)
-        .body(String::from(user))
-        .headers(construct_headers())
-        .send()
-        .await
-        .expect("fail to post")
-        .text()
-        .await
-        .expect("failed to post");
-    return idk;
-}
+// #[derive(Deserialize)]
+// struct User {
+//     items: Vec<For_vect>,
+// }
 
 fn main() {
-    let idk = get_user(String::from("http://192.168.0.110:8090"));
-    let mydata = CreateUser {
-        username: "Please Work!".to_string(),
-        field: "Pro".to_string(),
-        money: 999,
+    let user = crud::Collection {
+        host: "http://192.168.0.110".to_string(),
+        port: 8090,
+        collection: "user".to_string(),
     };
-    // let newdata = CreateUserData { data: mydata };
-    let json = serde_json::to_string(&mydata).unwrap();
-    println!("{}", json);
-    println!("{}", idk.items[0].username);
+    let mydata: CreateUser = CreateUser {
+        username: "now2".to_string(),
+        field: "Pro".to_string(),
+        money: 100,
+    };
+    let data: String = serde_json::to_string(&mydata).unwrap();
+    let mymoney: Money = Money { money: 123 };
+    let money: String = serde_json::to_string(&mymoney).unwrap();
+    let created = user.create(data);
+    let created_data: ForVect = serde_json::from_str(&created).unwrap();
+    println!("example of create {}", &created);
+    println!("example of list {}", user.list());
+    println!("{}", created_data.id);
     println!(
-        "{}",
-        select_user(
-            &json,
-            "http://192.168.0.110:8090".to_string(),
-            "galdjj7yw0pz2oe".to_string()
-        )
-    )
+        "example of update{}",
+        user.update(String::from(&created_data.id), money)
+    );
+    println!(
+        "example of select {}",
+        user.select(String::from(&created_data.id))
+    );
+    println!(
+        "example of delete {}",
+        user.delete(String::from(&created_data.id))
+    );
 }
