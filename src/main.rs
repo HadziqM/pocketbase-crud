@@ -24,10 +24,6 @@ struct CreateUser {
     field: String,
     money: u128,
 }
-#[derive(Serialize)]
-struct Money {
-    money: u128,
-}
 
 #[derive(Deserialize)]
 struct ForVect {
@@ -56,8 +52,6 @@ fn main() {
         money: 100,
     };
     let data: String = serde_json::to_string(&mydata).unwrap();
-    let mymoney: Money = Money { money: 123 };
-    let money: String = serde_json::to_string(&mymoney).unwrap();
     let created = user.create(data);
     let created_data: ForVect = serde_json::from_str(&created).unwrap();
     println!("example of create {}", &created);
@@ -65,7 +59,10 @@ fn main() {
     println!("{}", created_data.id);
     println!(
         "example of update{}",
-        user.update(String::from(&created_data.id), money)
+        user.update(
+            String::from(&created_data.id),
+            String::from(r#"{"money":1234}"#)
+        )
     );
     println!(
         "example of select {}",
