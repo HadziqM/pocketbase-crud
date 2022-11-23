@@ -55,20 +55,32 @@ async fn get_user(url: String) -> User {
         .expect("failed");
     return resp;
 }
+
+fn construct_headers() -> reqwest::header::HeaderMap {
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(
+        reqwest::header::CONTENT_TYPE,
+        reqwest::header::HeaderValue::from_static("application/json"),
+    );
+    headers
+}
+
 #[tokio::main]
 async fn create_user(user: &str, url: String) -> String {
     let mut some_string = String::from(&url);
     some_string.push_str("/api/collections/user/records");
     let client = reqwest::Client::new();
-    client
+    let idk = client
         .post(&some_string)
         .body(String::from(user))
+        .headers(construct_headers())
         .send()
         .await
         .expect("fail to post")
         .text()
         .await
-        .expect("failed to post")
+        .expect("failed to post");
+    return idk;
 }
 
 fn main() {
@@ -78,8 +90,8 @@ fn main() {
         field: "Pro".to_string(),
         money: 10000,
     };
-    let newdata = CreateUserData { data: mydata };
-    let json = serde_json::to_string(&newdata).unwrap();
+    // let newdata = CreateUserData { data: mydata };
+    let json = serde_json::to_string(&mydata).unwrap();
     println!("{}", json);
     println!("{}", idk.items[0].username);
     println!(
