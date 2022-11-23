@@ -14,15 +14,15 @@ use serde::{Deserialize, Serialize};
 //     money: u128,
 // }
 
+// #[derive(Serialize)]
+// struct CreateUserData {
+//     data: CreateUser,
+// }
 #[derive(Serialize)]
 struct CreateUser {
     username: String,
     field: String,
     money: u128,
-}
-#[derive(Serialize)]
-struct CreateUserData {
-    data: CreateUser,
 }
 
 #[derive(Deserialize)]
@@ -82,13 +82,65 @@ async fn create_user(user: &str, url: String) -> String {
         .expect("failed to post");
     return idk;
 }
+#[tokio::main]
+async fn select_user(user: &str, url: String, id: String) -> String {
+    let mut some_string = String::from(&url);
+    some_string.push_str("/api/collections/user/records/");
+    some_string.push_str(&id);
+    let client = reqwest::Client::new();
+    let idk = client
+        .get(&some_string)
+        .send()
+        .await
+        .expect("fail to post")
+        .text()
+        .await
+        .expect("failed to post");
+    return idk;
+}
+#[tokio::main]
+async fn edit_user(user: &str, url: String, id: String) -> String {
+    let mut some_string = String::from(&url);
+    some_string.push_str("/api/collections/user/records/");
+    some_string.push_str(&id);
+    let client = reqwest::Client::new();
+    let idk = client
+        .patch(&some_string)
+        .body(String::from(user))
+        .headers(construct_headers())
+        .send()
+        .await
+        .expect("fail to post")
+        .text()
+        .await
+        .expect("failed to post");
+    return idk;
+}
+#[tokio::main]
+async fn delete_user(user: &str, url: String, id: String) -> String {
+    let mut some_string = String::from(&url);
+    some_string.push_str("/api/collections/user/records/");
+    some_string.push_str(&id);
+    let client = reqwest::Client::new();
+    let idk = client
+        .delete(&some_string)
+        .body(String::from(user))
+        .headers(construct_headers())
+        .send()
+        .await
+        .expect("fail to post")
+        .text()
+        .await
+        .expect("failed to post");
+    return idk;
+}
 
 fn main() {
     let idk = get_user(String::from("http://192.168.0.110:8090"));
     let mydata = CreateUser {
         username: "Please Work!".to_string(),
         field: "Pro".to_string(),
-        money: 10000,
+        money: 999,
     };
     // let newdata = CreateUserData { data: mydata };
     let json = serde_json::to_string(&mydata).unwrap();
@@ -96,6 +148,10 @@ fn main() {
     println!("{}", idk.items[0].username);
     println!(
         "{}",
-        create_user(&json, "http://192.168.0.110:8090".to_string())
+        select_user(
+            &json,
+            "http://192.168.0.110:8090".to_string(),
+            "galdjj7yw0pz2oe".to_string()
+        )
     )
 }
