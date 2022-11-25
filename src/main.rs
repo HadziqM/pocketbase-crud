@@ -55,7 +55,7 @@ fn main() {
     let created = user.create(data);
     let created_data: ForVect = serde_json::from_str(&created).unwrap();
     println!("example of create {}", &created);
-    println!("example of list {}", user.list());
+    println!("example of list {}", user.list(None));
     println!("{}", created_data.id);
     println!(
         "example of update{}",
